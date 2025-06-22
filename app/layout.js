@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "NEXT- TKE component Manager",
+  title: "TKE component Manager",
   description: "ready to rock",
 };
 
