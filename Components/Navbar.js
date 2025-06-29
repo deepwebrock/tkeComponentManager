@@ -115,8 +115,8 @@ function NavLink({ href, label }) {
       onClick={handleClick}
       className={`text-sm transition duration-200 transform px-1 py-0.5
         ${isActive
-          ? 'font-bold text-blue-400  rounded shadow-inner'
-          : 'font-bold hover:text-sky-400 hover:scale-105'
+          ? 'font-bold  text-sky-400 rounded shadow-inner'
+          : 'font-bold hover:text-blue-400  hover:scale-105'
         }`}
     >
       {label}
