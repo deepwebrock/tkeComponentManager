@@ -5,7 +5,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import LowStockAlert from '@/Components/LowStockAlert';
-import {useRef } from 'react';
+import { useRef } from 'react';
 
 
 
@@ -33,9 +33,27 @@ export default function ComponentEntryPage() {
     location: '',
     Engn: '',
   });
-  
+
+  const [columnFilters, setColumnFilters] = useState({
+    name: '',
+    gmds: '',
+    Lqty: '',
+    Aqty: '',
+    location: '',
+    Engn: ''
+  });
+
 
   const [editIndex, setEditIndex] = useState(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 100; // You can change this to 10 or any number you like
+
+  useEffect(() => {
+    setCurrentPage(1); // Reset to first page when filters/search changes
+  }, [searchQuery, columnFilters]);
+
+
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -74,7 +92,7 @@ export default function ComponentEntryPage() {
       updatedComponents[editIndex] = newComponent;
 
       logToMaster({
-        type: 'Edited',
+        type: 'New Component Entry Updated',
         serialNumber: newComponent.serialNumber,
         name: newComponent.name,
         qty: '',
@@ -84,6 +102,7 @@ export default function ComponentEntryPage() {
         location: newComponent.location,
         Engn: newComponent.Engn
       });
+
 
       setEditIndex(null);
     } else {
@@ -134,7 +153,29 @@ export default function ComponentEntryPage() {
   };
 
   const handleDelete = (index) => {
+    const deletedComponent = components[index];
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete:\n\nComponent: ${deletedComponent.name}\nGMDS: ${deletedComponent.gmds}?`
+    );
+
+    if (!confirmed) return; // If user cancels, do nothing
+
     const isEditingDeletedRow = editIndex === index;
+
+    // Log the deleted item
+    logToMaster({
+      type: 'New Component Entry Deleted',
+      serialNumber: deletedComponent.serialNumber,
+      name: deletedComponent.name,
+      qty: '',
+      gmds: deletedComponent.gmds,
+      Lqty: deletedComponent.Lqty,
+      Aqty: deletedComponent.Aqty,
+      location: deletedComponent.location,
+      Engn: deletedComponent.Engn
+    });
+
     const updated = components.filter((_, i) => i !== index);
     const reSerialed = updated.map((comp, idx) => ({
       ...comp,
@@ -162,11 +203,50 @@ export default function ComponentEntryPage() {
     }
   };
 
-  const filteredComponents = components.filter(c =>
-    c.name.toLowerCase().includes(searchQuery) ||
-    c.gmds.toLowerCase().includes(searchQuery) ||
-    c.Engn.toLowerCase().includes(searchQuery)
+
+  // const filteredComponents = components.filter(c =>
+  //   c.name.toLowerCase().includes(searchQuery) ||
+  //   c.gmds.toLowerCase().includes(searchQuery) ||
+  //   c.Engn.toLowerCase().includes(searchQuery)
+  // );
+
+
+  const filteredComponents = components.filter(c => {
+    const matchesColumnFilters =
+      (columnFilters.name === '' || c.name === columnFilters.name) &&
+      (columnFilters.gmds === '' || c.gmds === columnFilters.gmds) &&
+      (columnFilters.location === '' || c.location === columnFilters.location) &&
+      (columnFilters.Engn === '' || c.Engn === columnFilters.Engn) &&
+      (columnFilters.Lqty === '' || c.Lqty === columnFilters.Lqty) &&
+      (columnFilters.Aqty === '' || c.Aqty === columnFilters.Aqty);
+
+    const matchesSearch =
+      c.name.toLowerCase().includes(searchQuery) ||
+      c.gmds.toLowerCase().includes(searchQuery) ||
+      c.location.toLowerCase().includes(searchQuery) ||
+      c.Engn.toLowerCase().includes(searchQuery) ||
+      c.Lqty.toLowerCase?.().includes?.(searchQuery) || // Optional
+      c.Aqty.toLowerCase?.().includes?.(searchQuery);    // Optional
+
+    return matchesColumnFilters && matchesSearch;
+  });
+
+  const uniqueValues = {
+    name: [...new Set(components.map(c => c.name))],
+    gmds: [...new Set(components.map(c => c.gmds))],
+    location: [...new Set(components.map(c => c.location))],
+    Engn: [...new Set(components.map(c => c.Engn))],
+    Lqty: [...new Set(components.map(c => c.Lqty))],
+    Aqty: [...new Set(components.map(c => c.Aqty))]
+  };
+
+  const totalPages = Math.ceil(filteredComponents.length / itemsPerPage);
+  const paginatedComponents = filteredComponents.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
+
+
 
   return (
     <>
@@ -195,7 +275,7 @@ export default function ComponentEntryPage() {
           <div className="mb-4">
             <input
               type="text"
-              placeholder="Search by Name, GMDS or Engineer Name..."
+              placeholder="Search by Name or GMDS or Location or Engineer Name"
               className="w-full border p-2 rounded"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
@@ -203,39 +283,220 @@ export default function ComponentEntryPage() {
           </div>
           <h2 className="text-xl font-semibold mb-2">All Components</h2>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full border whitespace-nowrap">
-              <thead>
-                <tr className="bg-gray-200 text-left">
+          <div className="overflow-x-auto text-center">
+            <table className="min-w-full border whitespace-nowrap text-center ">
+              <thead className=''>
+                <tr className="bg-orange-500 text-center">
                   <th className="p-2">S.No.</th>
-                  <th className="p-2">Component Name</th>
-                  <th className="p-2">GMDS Code</th>
-                  <th className="p-2">Live Qty</th>
-                  <th className="p-2">Alert Qty</th>
-                  <th className="p-2">Location</th>
-                  <th className="p-2">Engineer</th>
-                  <th className="p-2">Actions</th>
+
+                  <th
+                    className={`relative p-2 text-center transition-all duration-150 hover:scale-100 hover:bg-white rounded `}
+                  >
+                    <span className="pointer-events-none font-bold flex items-center justify-center gap-1">
+                      Component
+                      {columnFilters.name && <span className="text-blue-500 text-xs pl-1">⚗️</span>}
+                    </span>
+
+                    <select
+                      value={columnFilters.name}
+                      onChange={(e) =>
+                        setColumnFilters({ ...columnFilters, name: e.target.value })
+                      }
+                      className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                    >
+                      <option value="">Component</option>
+                      {uniqueValues.name.map((val, i) => (
+                        <option key={i} value={val}>
+                          {val}
+                        </option>
+                      ))}
+                    </select>
+                  </th>
+
+
+
+                  <th className="relative p-2 text-center transition-all duration-150 hover:scale-100 hover:bg-gray-100 rounded">
+                    <span className="pointer-events-none font-bold flex items-center justify-center gap-1">
+                      GMDS
+                      {columnFilters.gmds && <span className="text-blue-500 text-xs pl-1">⚗️</span>}
+                    </span>
+                    <select
+                      value={columnFilters.gmds}
+                      onChange={(e) => setColumnFilters({ ...columnFilters, gmds: e.target.value })}
+                      className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                    >
+                      <option value="">GMDS</option>
+                      {uniqueValues.gmds.map((val, i) => (
+                        <option key={i} value={val}>{val}</option>
+                      ))}
+                    </select>
+                  </th>
+
+                  <th className="relative p-2 text-center transition-all duration-150 hover:scale-100 hover:bg-gray-100 rounded">
+                    <span className="pointer-events-none font-bold flex items-center justify-center gap-1">
+                      Lqty
+                      {columnFilters.Lqty && <span className="text-blue-500 text-xs pl-1">⚗️</span>}
+                    </span>
+                    <select
+                      value={columnFilters.Lqty}
+                      onChange={(e) => setColumnFilters({ ...columnFilters, Lqty: e.target.value })}
+                      className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                    >
+                      <option value="">Live Qty</option>
+                      {uniqueValues.Lqty.map((val, i) => (
+                        <option key={i} value={val}>{val}</option>
+                      ))}
+                    </select>
+                  </th>
+
+                  <th className="relative p-2 text-center transition-all duration-150 hover:scale-100 hover:bg-gray-100 rounded">
+                    <span className="pointer-events-none font-bold flex items-center justify-center gap-1">
+                      Aqty
+                      {columnFilters.Aqty && <span className="text-blue-500 text-xs pl-1">⚗️</span>}
+                    </span>
+                    <select
+                      value={columnFilters.Aqty}
+                      onChange={(e) => setColumnFilters({ ...columnFilters, Aqty: e.target.value })}
+                      className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                    >
+                      <option value="">Alert Qty</option>
+                      {uniqueValues.Aqty.map((val, i) => (
+                        <option key={i} value={val}>{val}</option>
+                      ))}
+                    </select>
+                  </th>
+
+                  <th className="relative p-2 text-center transition-all duration-150 hover:scale-100 hover:bg-gray-100 rounded">
+                    <span className="pointer-events-none font-bold flex items-center justify-center gap-1">
+                      Location
+                      {columnFilters.location && <span className="text-blue-500 text-xs pl-1">⚗️</span>}
+                    </span>
+                    <select
+                      value={columnFilters.location}
+                      onChange={(e) => setColumnFilters({ ...columnFilters, location: e.target.value })}
+                      className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                    >
+                      <option value="">Location</option>
+                      {uniqueValues.location.map((val, i) => (
+                        <option key={i} value={val}>{val}</option>
+                      ))}
+                    </select>
+                  </th>
+
+                  {/* <th className="p-2">
+                    <select
+                      className="rounded"
+                      value={columnFilters.Engn}
+                      onChange={e => setColumnFilters({ ...columnFilters, Engn: e.target.value })}
+                    >
+                      <option className='text-center' value="">Engineers</option>
+                      {uniqueValues.Engn.map((val, i) => (
+                        <option key={i} value={val}>{val}</option>
+                      ))}
+                    </select>
+                  </th> */}
+
+                  <th className="relative p-2 text-center transition-all duration-150 hover:scale-100 hover:bg-gray-100 rounded">
+                    <span className="pointer-events-none font-bold flex items-center justify-center gap-1">
+                      Engineer
+                      {columnFilters.Engn && <span className="text-blue-500 text-xs pl-1">⚗️</span>}
+                    </span>
+                    <select
+                      value={columnFilters.Engn}
+                      onChange={(e) => setColumnFilters({ ...columnFilters, Engn: e.target.value })}
+                      className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                    >
+                      <option value="">Engineer</option>
+                      {uniqueValues.Engn.map((val, i) => (
+                        <option key={i} value={val}>{val}</option>
+                      ))}
+                    </select>
+                  </th>
+
+                  <th className="p-2 text-center">Actions</th>
                 </tr>
               </thead>
-              <tbody>
-                {filteredComponents.map((comp, idx) => (
-                  <tr key={idx} className="border-t">
-                    <td className="p-2">{comp.serialNumber}</td>
-                    <td className="p-2">{comp.name}</td>
-                    <td className="p-2">{comp.gmds}</td>
-                    <td className="p-2">{comp.Lqty}</td>
-                    <td className="p-2">{comp.Aqty}</td>
-                    <td className="p-2">{comp.location}</td>
-                    <td className="p-2">{comp.Engn}</td>
-                    <td className="p-2 space-x-2">
-                      <button onClick={() => handleEdit(idx)} className="bg-yellow-400 px-2 py-1 rounded">Edit</button>
-                      <button onClick={() => handleDelete(idx)} className="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+
+              {/* <tbody>
+                {filteredComponents.length > 0 ? (
+                  filteredComponents.map((comp, idx) => (
+                    <tr key={idx} className="border-t">
+                      <td className="p-2">{comp.serialNumber}</td>
+                      <td className="p-2">{comp.name}</td>
+                      <td className="p-2">{comp.gmds}</td>
+                      <td className="p-2">{comp.Lqty}</td>
+                      <td className="p-2">{comp.Aqty}</td>
+                      <td className="p-2">{comp.location}</td>
+                      <td className="p-2">{comp.Engn}</td>
+                      <td className="p-2 space-x-2">
+                        <button onClick={() => handleEdit(idx)} className="bg-yellow-400 px-2 py-1 rounded">Edit</button>
+                        <button onClick={() => handleDelete(idx)} className="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="8" className="p-4 text-center text-gray-500">
+                      No matching records found.
                     </td>
                   </tr>
-                ))}
+                )}
+              </tbody> */}
+
+              <tbody>
+                {paginatedComponents.length > 0 ? (
+                  paginatedComponents.map((comp, idx) => (
+                    <tr key={idx} className="border-t">
+                      <td className="p-2">{comp.serialNumber}</td>
+                      <td className="p-2">{comp.name}</td>
+                      <td className="p-2">{comp.gmds}</td>
+                      <td className="p-2">{comp.Lqty}</td>
+                      <td className="p-2">{comp.Aqty}</td>
+                      <td className="p-2">{comp.location}</td>
+                      <td className="p-2">{comp.Engn}</td>
+                      <td className="p-2 space-x-2">
+                        <button onClick={() => handleEdit(idx)} className="bg-yellow-400 px-2 py-1 rounded">Edit</button>
+                        <button onClick={() => handleDelete(idx)} className="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="8" className="p-4 text-center text-gray-500">
+                      No matching records found.
+                    </td>
+                  </tr>
+                )}
               </tbody>
+
+
             </table>
           </div>
+
+
+{/* Pagination */}
+          <div className="flex justify-center items-center mt-10 space-x-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 bg-blue-500 text-white rounded disabled:opacity-50"
+            >
+              Prev
+            </button>
+
+            <span className="text-gray-700">
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 bg-blue-500 text-white rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+
         </div>
       </div>
     </>
