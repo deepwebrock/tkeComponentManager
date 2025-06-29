@@ -1,6 +1,3 @@
-// RESPONSIVE
-
-
 'use client';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
@@ -48,7 +45,7 @@ export default function Navbar() {
         <NavLink href="/master" label="Master Page" />
       </div>
 
-      {/* Engineer Name + Logout for Desktop */}
+      {/* Engineer Name + Logout */}
       <div className="hidden md:flex items-center gap-4">
         <span className="text-sm">{engineerName}</span>
         <button
@@ -59,7 +56,7 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Hamburger Icon (Mobile & Tablet) */}
+      {/* Hamburger for Mobile */}
       <div className="md:hidden">
         <button onClick={toggleMenu} className="focus:outline-none">
           <svg
@@ -87,14 +84,13 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Dropdown Menu (Mobile & Tablet) */}
+      {/* Mobile Menu */}
       {menuOpen && (
         <div className="absolute top-full left-0 w-full bg-gray-800 flex flex-col gap-4 px-4 py-4 md:hidden shadow-md z-40">
           <NavLink href="/component-entry" label="New Component Entry" />
           <NavLink href="/required-components" label="Required Components" />
           <NavLink href="/deposit-components" label="Deposit Components" />
           <NavLink href="/master" label="Master Page" />
-          {/* <span className="text-sm">{engineerName}</span> */}
           <button
             onClick={handleLogout}
             className="bg-red-500 px-3 py-1 rounded hover:bg-red-600 text-sm w-full text-left"
@@ -109,14 +105,22 @@ export default function Navbar() {
 
 function NavLink({ href, label }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const isActive = pathname === href;
+
   const handleClick = () => router.push(href);
 
   return (
     <button
       onClick={handleClick}
-      className="text-left text-sm hover:underline"
+      className={`text-sm transition duration-200 transform px-1 py-0.5
+        ${isActive
+          ? 'font-bold text-blue-400  rounded shadow-inner'
+          : 'font-bold hover:text-sky-400 hover:scale-105'
+        }`}
     >
       {label}
     </button>
   );
 }
+
