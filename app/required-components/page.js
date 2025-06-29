@@ -149,25 +149,25 @@ export default function RequiredComponentsPage() {
             <thead>
               <tr className="bg-orange-500 text-center">
                 <th className="p-2">S.No.</th>
-                <th className="relative p-2">Component{columnFilters.name && <span className="text-blue-500 text-xs"> ⚗️</span>}
+                <th className="relative p-2 text-center transition-all duration-150 hover:scale-100 hover:bg-white rounded">Component{columnFilters.name && <span className="text-blue-500 text-xs"> ⚗️</span>}
                   <select value={columnFilters.name} onChange={e => setColumnFilters({ ...columnFilters, name: e.target.value })} className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer">
                     <option value="">Component</option>
                     {uniqueValues.name.map((val, i) => (<option key={i} value={val}>{val}</option>))}
                   </select>
                 </th>
-                <th className="relative p-2">Required Qty{columnFilters.requiredQty && <span className="text-blue-500 text-xs"> ⚗️</span>}
+                <th className="relative p-2 text-center transition-all duration-150 hover:scale-100 hover:bg-white rounded">Required Qty{columnFilters.requiredQty && <span className="text-blue-500 text-xs"> ⚗️</span>}
                   <select value={columnFilters.requiredQty} onChange={e => setColumnFilters({ ...columnFilters, requiredQty: e.target.value })} className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer">
                     <option value="">Required Qty</option>
                     {uniqueValues.requiredQty.map((val, i) => (<option key={i} value={val}>{val}</option>))}
                   </select>
                 </th>
-                <th className="relative p-2">Updated Live Qty{columnFilters.updatedLqty && <span className="text-blue-500 text-xs"> ⚗️</span>}
+                <th className="relative p-2 text-center transition-all duration-150 hover:scale-100 hover:bg-white rounded">Updated Live Qty{columnFilters.updatedLqty && <span className="text-blue-500 text-xs"> ⚗️</span>}
                   <select value={columnFilters.updatedLqty} onChange={e => setColumnFilters({ ...columnFilters, updatedLqty: e.target.value })} className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer">
                     <option value="">Updated Live Qty</option>
                     {uniqueValues.updatedLqty.map((val, i) => (<option key={i} value={val}>{val}</option>))}
                   </select>
                 </th>
-                <th className="relative p-2">Engineer{columnFilters.Engn && <span className="text-blue-500 text-xs"> ⚗️</span>}
+                <th className="relative p-2 text-center transition-all duration-150 hover:scale-100 hover:bg-white rounded">Engineer{columnFilters.Engn && <span className="text-blue-500 text-xs"> ⚗️</span>}
                   <select value={columnFilters.Engn} onChange={e => setColumnFilters({ ...columnFilters, Engn: e.target.value })} className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer">
                     <option value="">Engineer</option>
                     {uniqueValues.Engn.map((val, i) => (<option key={i} value={val}>{val}</option>))}

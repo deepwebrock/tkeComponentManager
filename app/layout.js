@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "TKE component Manager",
+  title: "TKE ITS INDIA",
   description: "ready to rock",
 };
 
