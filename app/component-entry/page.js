@@ -81,71 +81,91 @@ export default function ComponentEntryPage() {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    const updatedComponents = [...components];
+  e.preventDefault();
+  const updatedComponents = [...components];
+  let newSerial = form.serialNumber;
+  let newComponent;
 
-    let newSerial = form.serialNumber;
-    let newComponent;
+  if (editIndex !== null) {
+    const original = components[editIndex];
 
-    if (editIndex !== null) {
-      newComponent = { ...form };
-      updatedComponents[editIndex] = newComponent;
+    const isChanged =
+      form.name !== original.name ||
+      form.gmds !== original.gmds ||
+      String(form.Lqty) !== String(original.Lqty) ||
+      String(form.Aqty) !== String(original.Aqty) ||
+      form.location !== original.location ||
+      form.Engn !== original.Engn;
 
-      logToMaster({
-        type: 'New Component Entry Updated',
-        serialNumber: newComponent.serialNumber,
-        name: newComponent.name,
-        qty: '',
-        gmds: newComponent.gmds,
-        Lqty: newComponent.Lqty,
-        Aqty: newComponent.Aqty,
-        location: newComponent.location,
-        Engn: newComponent.Engn
-      });
-
-
+    if (!isChanged) {
+      alert('⚠️ No changes detected. Nothing updated.');
       setEditIndex(null);
-    } else {
-      newSerial =
-        components.length > 0
-          ? Math.max(...components.map(c => parseInt(c.serialNumber))) + 1
-          : 1;
-
-      newComponent = { ...form, serialNumber: newSerial };
-      updatedComponents.push(newComponent);
-
-      logToMaster({
-        type: 'New Entry',
-        serialNumber: newComponent.serialNumber,
-        name: newComponent.name,
-        qty: '',
-        gmds: newComponent.gmds,
-        Lqty: newComponent.Lqty,
-        Aqty: newComponent.Aqty,
-        location: newComponent.location,
-        Engn: newComponent.Engn
-      });
+      return;
     }
 
-    setComponents(updatedComponents);
-    saveToStorage(updatedComponents);
+    newComponent = { ...form };
+    updatedComponents[editIndex] = newComponent;
 
-    const nextSerial =
-      updatedComponents.length > 0
-        ? Math.max(...updatedComponents.map(c => parseInt(c.serialNumber))) + 1
-        : 1;
-
-    setForm({
-      serialNumber: nextSerial,
-      name: '',
-      gmds: '',
-      Lqty: '',
-      Aqty: '',
-      location: '',
-      Engn: engineerName,
+    logToMaster({
+      type: 'New Component Entry Updated',
+      serialNumber: newComponent.serialNumber,
+      name: newComponent.name,
+      qty: '',
+      gmds: newComponent.gmds,
+      Lqty: newComponent.Lqty,
+      Aqty: newComponent.Aqty,
+      location: newComponent.location,
+      Engn: newComponent.Engn
     });
-    nameInputRef.current?.focus();
-  };
+
+    setEditIndex(null);
+  } else {
+    const gmdsExists = components.some(c => c.gmds === form.gmds);
+    if (gmdsExists) {
+      alert('❌ Component with this GMDS code already exists!');
+      return;
+    }
+
+    newSerial = components.length > 0
+      ? Math.max(...components.map(c => parseInt(c.serialNumber))) + 1
+      : 1;
+
+    newComponent = { ...form, serialNumber: newSerial };
+    updatedComponents.push(newComponent);
+
+    logToMaster({
+      type: 'New Entry',
+      serialNumber: newComponent.serialNumber,
+      name: newComponent.name,
+      qty: '',
+      gmds: newComponent.gmds,
+      Lqty: newComponent.Lqty,
+      Aqty: newComponent.Aqty,
+      location: newComponent.location,
+      Engn: newComponent.Engn
+    });
+  }
+
+  setComponents(updatedComponents);
+  saveToStorage(updatedComponents);
+
+  const nextSerial = updatedComponents.length > 0
+    ? Math.max(...updatedComponents.map(c => parseInt(c.serialNumber))) + 1
+    : 1;
+
+  setForm({
+    serialNumber: nextSerial,
+    name: '',
+    gmds: '',
+    Lqty: '',
+    Aqty: '',
+    location: '',
+    Engn: engineerName,
+  });
+
+  nameInputRef.current?.focus();
+};
+
 
   const handleEdit = (index) => {
     setForm(components[index]);
