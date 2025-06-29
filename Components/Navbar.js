@@ -21,12 +21,16 @@ export default function Navbar() {
 
   if (pathname === '/login' || !loggedIn) return null;
 
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('engineerName');
-    router.push('/login');
-  };
+ const handleLogout = () => {
+  const confirmLogout = window.confirm('Are you sure you want to logout?');
+  if (!confirmLogout) return;
+
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('userEmail');
+  localStorage.removeItem('engineerName');
+  router.push('/login');
+};
+
 
   const toggleMenu = () => setMenuOpen(prev => !prev);
 
