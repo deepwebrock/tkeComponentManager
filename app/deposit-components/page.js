@@ -19,8 +19,8 @@ export default function DepositComponentsPage() {
 
   // Pagination
   useEffect(() => {
-  setCurrentPage(1);
-}, [searchTerm, columnFilters]);
+    setCurrentPage(1);
+  }, [searchTerm, columnFilters]);
 
 
 
@@ -53,6 +53,12 @@ export default function DepositComponentsPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // ❗ Validation: Check if qty is a valid positive number
+    if (!form.qty || parseInt(form.qty) <= 0) {
+      alert("❌ Deposit Quantity must be a positive number.");
+      return;
+    }
+
     const selected = components.find(c => c.name === form.name);
     if (!selected) return;
 
@@ -67,6 +73,7 @@ export default function DepositComponentsPage() {
 
     const now = new Date();
     const dateTime = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}, ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
     const newDeposit = {
       serialNumber: selected.serialNumber,
       name: form.name,
@@ -93,6 +100,7 @@ export default function DepositComponentsPage() {
     setForm({ name: '', qty: '', Engn: engineerName });
   };
 
+
   const uniqueValues = {
     name: [...new Set(depositRecords.map(r => r.name))],
     depositQty: [...new Set(depositRecords.map(r => r.depositQty))],
@@ -100,7 +108,7 @@ export default function DepositComponentsPage() {
     updatedLqty: [...new Set(depositRecords.map(r => r.updatedLqty))]
   };
 
-  
+
 
   const filteredDeposits = depositRecords.filter(record =>
     (columnFilters.name === '' || record.name === columnFilters.name) &&
@@ -113,9 +121,9 @@ export default function DepositComponentsPage() {
       record.dateTime.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
-  
 
-// pagination
+
+  // pagination
   const totalPages = Math.ceil(filteredDeposits.length / itemsPerPage);
   const paginatedDeposits = filteredDeposits.slice(
     (currentPage - 1) * itemsPerPage,
@@ -147,12 +155,14 @@ export default function DepositComponentsPage() {
 
           <input
             type="number"
+            min="1"
             placeholder="Deposit Quantity"
             className="w-full border p-2"
             value={form.qty}
             onChange={e => setForm({ ...form, qty: e.target.value })}
             required
           />
+
 
           <input
             type="text"
@@ -285,26 +295,26 @@ export default function DepositComponentsPage() {
 
         {/* Pagination */}
         <div className="flex justify-center items-center mt-10 space-x-2">
-  <button
-    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-    disabled={currentPage === 1}
-    className="px-3 py-1 bg-blue-500 text-white rounded disabled:opacity-50"
-  >
-    Prev
-  </button>
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1 bg-blue-500 text-white rounded disabled:opacity-50"
+          >
+            Prev
+          </button>
 
-  <span className="text-gray-700">
-    Page {currentPage} of {totalPages}
-  </span>
+          <span className="text-gray-700">
+            Page {currentPage} of {totalPages}
+          </span>
 
-  <button
-    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-    disabled={currentPage === totalPages}
-    className="px-3 py-1 bg-blue-500 text-white rounded disabled:opacity-50"
-  >
-    Next
-  </button>
-</div>
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 bg-blue-500 text-white rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
 
       </div>
     </>

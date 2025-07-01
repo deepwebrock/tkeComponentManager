@@ -132,7 +132,17 @@ export default function RequiredComponentsPage() {
             {componentNames.map((n, i) => (<option key={i} value={n}>{n}</option>))}
           </select>
 
-          <input type="number" placeholder="Required Quantity" className="w-full border p-2" value={form.qty} onChange={e => setForm({ ...form, qty: e.target.value })} required />
+          {/* <input type="number" placeholder="Required Quantity" className="w-full border p-2" value={form.qty} onChange={e => setForm({ ...form, qty: e.target.value })} required /> */}
+
+          <input
+            type="number"
+            min="1"
+            placeholder="Required Quantity"
+            className="w-full border p-2"
+            value={form.qty}
+            onChange={e => setForm({ ...form, qty: e.target.value })}
+            required
+          />
 
           <input type="text" className="w-full border p-2 bg-gray-100 text-gray-600" value={form.Engn} readOnly />
 

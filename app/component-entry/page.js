@@ -82,6 +82,17 @@ export default function ComponentEntryPage() {
 
   const handleSubmit = (e) => {
   e.preventDefault();
+
+  // 🚫 Negative value check
+  if (
+    parseInt(form.gmds) < 0 ||
+    parseInt(form.Lqty) < 0 ||
+    parseInt(form.Aqty) < 0
+  ) {
+    alert("❌ Negative values are not allowed for GMDS, Live Qty or Alert Qty.");
+    return;
+  }
+
   const updatedComponents = [...components];
   let newSerial = form.serialNumber;
   let newComponent;
@@ -165,6 +176,7 @@ export default function ComponentEntryPage() {
 
   nameInputRef.current?.focus();
 };
+
 
 
   const handleEdit = (index) => {
@@ -281,9 +293,36 @@ export default function ComponentEntryPage() {
         <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
           <input type="number" value={form.serialNumber} readOnly className="w-full border p-2 bg-gray-100 text-gray-600" />
           <input type="text" placeholder="Component Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full border p-2" required ref={nameInputRef} />
-          <input type="number" placeholder="GMDS Code" value={form.gmds} onChange={(e) => setForm({ ...form, gmds: e.target.value })} className="w-full border p-2" required />
-          <input type="number" placeholder="Live Quantity" value={form.Lqty} onChange={(e) => setForm({ ...form, Lqty: e.target.value })} className="w-full border p-2" required />
-          <input type="number" placeholder="Alert Quantity" value={form.Aqty} onChange={(e) => setForm({ ...form, Aqty: e.target.value })} className="w-full border p-2" required />
+          {/* <input type="number" placeholder="GMDS Code" value={form.gmds} onChange={(e) => setForm({ ...form, gmds: e.target.value })} className="w-full border p-2" required /> */}
+          <input
+            type="number"
+            min="0"
+            placeholder="GMDS Code"
+            value={form.gmds}
+            onChange={(e) => setForm({ ...form, gmds: e.target.value })}
+            className="w-full border p-2"
+            required
+          />
+          {/* <input type="number" placeholder="Live Quantity" value={form.Lqty} onChange={(e) => setForm({ ...form, Lqty: e.target.value })} className="w-full border p-2" required /> */}
+          <input
+            type="number"
+            min="0"
+            placeholder="Live Quantity"
+            value={form.Lqty}
+            onChange={(e) => setForm({ ...form, Lqty: e.target.value })}
+            className="w-full border p-2"
+            required
+          />
+          {/* <input type="number" placeholder="Alert Quantity" value={form.Aqty} onChange={(e) => setForm({ ...form, Aqty: e.target.value })} className="w-full border p-2" required /> */}
+          <input
+            type="number"
+            min="0"
+            placeholder="Alert Quantity"
+            value={form.Aqty}
+            onChange={(e) => setForm({ ...form, Aqty: e.target.value })}
+            className="w-full border p-2"
+            required
+          />
           <input type="text" placeholder="Location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} className="w-full border p-2" required />
           <input type="text" value={form.Engn} readOnly className="w-full border p-2 bg-gray-100 text-gray-600" />
           <button type="submit" className="w-full bg-green-500 text-white py-2 rounded">
@@ -494,7 +533,7 @@ export default function ComponentEntryPage() {
           </div>
 
 
-{/* Pagination */}
+          {/* Pagination */}
           <div className="flex justify-center items-center mt-10 space-x-2">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
